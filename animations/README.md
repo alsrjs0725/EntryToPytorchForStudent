@@ -33,6 +33,33 @@ bash animations/setup.sh   # 우분투 기준. 시스템 패키지 설치와 .ve
 - `--quality l`(480p)로 빠르게 확인하고, 커밋할 때는 기본값 `m`(720p)을 씁니다.
 - 수식(`MathTex`)을 쓰려면 LaTeX(`texlive`, `texlive-latex-extra`, `dvisvgm`)가 추가로 필요합니다. 수식이 꼭 필요하지 않으면 `ko()` 텍스트로 대신합니다.
 
+## 배포 시 자동 렌더링 (홈서버)
+
+`main`에 머지되면 [배포 워크플로](../.github/workflows/deploy-docs.yml)가 홈서버(self-hosted 러너)에서 모든 장면을 렌더링하고 사이트와 함께 GitHub Pages에 올립니다.
+
+- 장면 파일 하나에 `Scene` 클래스 하나를 둡니다. `render.py --all`이 파일마다 그 클래스를 찾아 렌더링합니다.
+- 장면 파일, `common/`, `requirements.txt`가 바뀌지 않은 장면은 서버 캐시를 써서 다시 렌더링하지 않습니다.
+- 홈서버가 꺼져 있으면 배포가 대기 상태로 멈춥니다. 켜지면 이어서 진행됩니다.
+
+### 서버에서 한 번만 할 일 (우분투 기준)
+
+1. 렌더링에 필요한 시스템 패키지를 설치합니다.
+
+    ```bash
+    sudo apt-get install -y python3-venv libpango1.0-dev pkg-config fonts-noto-cjk ffmpeg
+    ```
+
+2. GitHub 저장소 → Settings → Actions → Runners → **New self-hosted runner**(Linux)에 나오는 명령으로 러너를 내려받고 `./config.sh`를 실행합니다. 라벨을 물으면 `manim`을 입력합니다.
+3. 서비스로 등록해 재부팅 뒤에도 켜지게 합니다.
+
+    ```bash
+    sudo ./svc.sh install && sudo ./svc.sh start
+    ```
+
+4. 저장소 Actions 탭에서 **Deploy docs**를 수동 실행(Run workflow)해 확인합니다.
+
+> 러너가 저장소 코드를 실행하므로 워크플로에 `pull_request` 트리거를 넣지 않습니다. 포크에서 온 PR 코드가 홈서버에서 실행될 수 있습니다.
+
 ## 문서에 넣기
 
 ```html
