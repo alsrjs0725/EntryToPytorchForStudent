@@ -1,5 +1,8 @@
 name: Deploy docs
 
+# 홈서버(self-hosted 러너, 라벨 "manim")에서 Manim 영상을 렌더링한 뒤 사이트와 함께 배포합니다.
+# 러너가 저장소 코드를 실행하므로 pull_request 트리거는 넣지 않습니다(포크 PR 코드가 홈서버에서 돌 수 있음).
+
 on:
   push:
     branches: [main]
@@ -14,18 +17,32 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  # 러너 서버에 남는 캐시. checkout이 작업 폴더를 지워도 유지됩니다.
+  CACHE_ROOT: ${{ github.workspace }}/../../_entry-cache
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, manim]
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: requirements-docs.txt
-      - run: pip install -r requirements-docs.txt
+
+      - name: Python 환경 준비
+        run: |
+          REQ_HASH=$(cat animations/requirements.txt requirements-docs.txt | sha256sum | cut -c1-12)
+          VENV="$CACHE_ROOT/venv-$REQ_HASH"
+          if [ ! -x "$VENV/bin/python" ]; then
+            python3 -m venv "$VENV"
+            "$VENV/bin/pip" install -q -r animations/requirements.txt -r requirements-docs.txt
+          fi
+          echo "$VENV/bin" >> "$GITHUB_PATH"
+
+      - name: Manim 영상 렌더링
+        run: python animations/render.py --all --cache-dir "$CACHE_ROOT/videos"
+
       - run: mkdocs build --strict
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
