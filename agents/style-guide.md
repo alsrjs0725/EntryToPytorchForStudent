@@ -31,9 +31,11 @@
 
 ## 코드
 
-- Python 3.10 이상, PyTorch 2.x 기준입니다.
-- 예제는 복사해서 바로 실행할 수 있어야 합니다. import부터 포함합니다.
-- CPU에서 몇 분 안에 끝나는 크기로 만듭니다.
+- Google Colab 무료 GPU(T4) 기준입니다. Colab에 기본 설치된 PyTorch를 쓰고, 추가 설치는 최소로 합니다.
+- 노트북 첫 셀은 GPU 확인과 `device` 설정입니다. 예: `device = "cuda" if torch.cuda.is_available() else "cpu"`
+- 예제는 셀 순서대로 실행하면 끝까지 돌아야 합니다. import부터 포함합니다.
+- 무료 Colab 세션 안에서 끝나도록 학습은 셀 하나당 10분 이내로 만듭니다.
 - 텐서를 다루는 줄에는 모양(shape)을 주석으로 적습니다. 예: `# (batch, seq_len, d_model)`
 - 결과가 정해지도록 `torch.manual_seed(0)`를 씁니다.
+- 개념은 그래프나 그림으로 먼저 보여줍니다. 시각화는 matplotlib을 씁니다.
 - 처음에는 직접 구현하고, 그다음에 PyTorch 내장 기능과 비교합니다.
