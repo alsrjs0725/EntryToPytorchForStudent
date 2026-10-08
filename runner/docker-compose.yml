@@ -1,0 +1,13 @@
+# 홈서버에서 실행: cd runner && cp .env.example .env && (토큰 입력) && docker compose up -d --build
+services:
+  runner:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    stop_grace_period: 1m
+    volumes:
+      # 작업 폴더. venv와 렌더링 캐시(_entry-cache)가 여기에 남아 재시작 뒤에도 재사용됩니다.
+      - runner-work:/home/runner/_work
+
+volumes:
+  runner-work:

@@ -41,22 +41,23 @@ bash animations/setup.sh   # 우분투 기준. 시스템 패키지 설치와 .ve
 - 장면 파일, `common/`, `requirements.txt`가 바뀌지 않은 장면은 서버 캐시를 써서 다시 렌더링하지 않습니다.
 - 홈서버가 꺼져 있으면 배포가 대기 상태로 멈춥니다. 켜지면 이어서 진행됩니다.
 
-### 서버에서 한 번만 할 일 (우분투 기준)
+### 서버에서 한 번만 할 일 (Docker)
 
-1. 렌더링에 필요한 시스템 패키지를 설치합니다.
+`runner/`에 러너와 Manim 환경을 담은 Docker 이미지가 있습니다. 서버에는 Docker만 있으면 됩니다.
 
-    ```bash
-    sudo apt-get install -y python3-venv libpango1.0-dev pkg-config fonts-noto-cjk ffmpeg
-    ```
-
-2. GitHub 저장소 → Settings → Actions → Runners → **New self-hosted runner**(Linux)에 나오는 명령으로 러너를 내려받고 `./config.sh`를 실행합니다. 라벨을 물으면 `manim`을 입력합니다.
-3. 서비스로 등록해 재부팅 뒤에도 켜지게 합니다.
+1. GitHub Settings → Developer settings → Fine-grained tokens에서 토큰을 만듭니다. 이 저장소만 선택하고, Repository permissions의 **Administration**을 Read and write로 줍니다.
+2. 서버에서 실행합니다.
 
     ```bash
-    sudo ./svc.sh install && sudo ./svc.sh start
+    git clone https://github.com/alsrjs0725/EntryToPytorchForStudent.git
+    cd EntryToPytorchForStudent/runner
+    cp .env.example .env   # ACCESS_TOKEN에 1번 토큰을 넣습니다
+    docker compose up -d --build
     ```
 
-4. 저장소 Actions 탭에서 **Deploy docs**를 수동 실행(Run workflow)해 확인합니다.
+3. 저장소 Settings → Actions → Runners에 `homeserver-manim`이 Idle로 보이면 됩니다. Actions 탭에서 **Deploy docs**를 수동 실행(Run workflow)해 확인합니다.
+
+컨테이너는 켜질 때 러너를 등록하고, `docker compose down`으로 멈출 때 등록을 해제합니다. 서버가 재부팅되면 자동으로 다시 켜집니다.
 
 > 러너가 저장소 코드를 실행하므로 워크플로에 `pull_request` 트리거를 넣지 않습니다. 포크에서 온 PR 코드가 홈서버에서 실행될 수 있습니다.
 
