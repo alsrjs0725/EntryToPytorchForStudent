@@ -19,6 +19,7 @@
 | 구조 검토 (Structure Reviewer) | 초안의 목차, 흐름, 제목을 검토할 때 | [agents/structure-reviewer.md](agents/structure-reviewer.md) |
 | 문장 교정 (Sentence Editor) | 구조가 확정된 뒤 문장을 다듬을 때 | [agents/sentence-editor.md](agents/sentence-editor.md) |
 | 코드 검증 (Code Reviewer) | 문서 속 예제 코드를 실행하고 확인할 때 | [agents/code-reviewer.md](agents/code-reviewer.md) |
+| 영상 제작 (Animator) | 개념을 Manim 애니메이션으로 보여줄 때 | [agents/animator.md](agents/animator.md) |
 
 역할이 지정되지 않았다면 요청 내용을 보고 위 표에서 고릅니다. 애매하면 **기획**부터 시작합니다.
 
@@ -26,6 +27,7 @@
 
 ```
 기획 → 작성 → 구조 검토 → (수정) → 코드 검증 → 문장 교정 → 관리자 확인
+             └→ 영상 제작 (작성과 함께 진행)
 ```
 
 - 한 단계는 한 역할만 맡습니다. 여러 역할을 한 번에 섞지 않습니다.
@@ -36,6 +38,7 @@
 
 - 튜토리얼 본문: `docs/<카테고리 번호>-<카테고리>/<문서 번호>-<제목>.md`
 - 실습 노트북: `notebooks/<카테고리 번호>-<카테고리>/<문서 번호>-<제목>.ipynb` (Colab에서 바로 열 수 있게 문서 첫머리에 "Open in Colab" 링크를 둡니다)
+- 애니메이션 원본: `animations/<카테고리 번호>-<카테고리>/<장면>.py` (렌더링 결과는 `docs/videos/` 같은 경로에 `.mp4`로 저장)
 - 기획서와 검토 기록: PR 설명이나 PR 코멘트에 남깁니다. 저장소에 별도 파일로 두지 않습니다.
 
 ## 참고
