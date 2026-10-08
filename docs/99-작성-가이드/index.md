@@ -29,6 +29,17 @@ mkdocs serve   # http://127.0.0.1:8000
 ![설명](../images/example.png){ width="500" }
 ```
 
+## 영상
+
+webm·mp4 영상은 `docs/videos/`에 넣고 HTML `<video>` 태그로 넣습니다. 학습 과정 애니메이션처럼 짧은 영상은 `autoplay loop muted`를 붙이면 GIF처럼 반복 재생됩니다.
+
+```html
+<video src="../../videos/example.webm" controls autoplay loop muted playsinline width="600"></video>
+```
+
+!!! tip "용량"
+    GitHub는 100MB가 넘는 파일을 받지 않습니다. 영상은 수 MB 이내로 줄이고, 긴 영상은 YouTube에 올려 `<iframe>`으로 넣습니다.
+
 ## 코드블럭
 
 언어, 제목, 줄 번호, 강조 줄을 지정할 수 있고 복사 버튼이 자동으로 붙습니다.
