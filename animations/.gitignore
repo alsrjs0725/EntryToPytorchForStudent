@@ -1,0 +1,3 @@
+# Manim 중간 결과물. 최종 영상은 render.py가 docs/videos/로 복사합니다.
+media/
+__pycache__/
