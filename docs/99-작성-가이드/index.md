@@ -37,6 +37,8 @@ webm·mp4 영상은 `docs/videos/`에 넣고 HTML `<video>` 태그로 넣습니�
 <video src="../../videos/example.webm" controls autoplay loop muted playsinline width="600"></video>
 ```
 
+시각화 영상은 Manim으로 만듭니다. 원본은 `animations/<카테고리>/<장면>.py`, 렌더링 결과는 `docs/videos/<카테고리>/<장면>.mp4`에 둡니다. 렌더링 방법은 [animations/README.md](https://github.com/alsrjs0725/EntryToPytorchForStudent/blob/main/animations/README.md)를 참고하세요.
+
 !!! tip "용량"
     GitHub는 100MB가 넘는 파일을 받지 않습니다. 영상은 수 MB 이내로 줄이고, 긴 영상은 YouTube에 올려 `<iframe>`으로 넣습니다.
 
