@@ -1,4 +1,7 @@
 # 홈서버에서 실행: cd runner && cp .env.example .env && (토큰 입력) && docker compose up -d --build
+# 폴더 이름이 runner인 다른 compose 프로젝트와 컨테이너가 섞이지 않게 이름을 고정합니다.
+name: entry-pytorch-runner
+
 services:
   runner:
     build: .
