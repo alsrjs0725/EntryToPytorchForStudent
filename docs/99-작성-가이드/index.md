@@ -13,6 +13,14 @@ mkdocs serve   # http://127.0.0.1:8000
 
 `docs/<카테고리 번호>-<카테고리>/<문서 번호>-<제목>.md` 형식으로 파일을 만들면 사이드바 목차에 번호 순으로 자동 추가됩니다. 페이지 제목은 파일 첫 줄의 `# 제목`을 따릅니다.
 
+## Colab 노트북 링크
+
+실습 노트북은 `notebooks/<카테고리 번호>-<카테고리>/<문서 번호>-<제목>.ipynb`에 두고, 문서 첫머리에 Colab 링크를 붙입니다. `blob/main/` 뒤에 저장소 기준 경로를 적으면 됩니다.
+
+```markdown
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/alsrjs0725/EntryToPytorchForStudent/blob/main/notebooks/00-시작하기/01-colab-사용법.ipynb)
+```
+
 ## 이미지
 
 이미지는 `docs/images/`에 넣고 문서 위치 기준 상대 경로로 참조합니다.
