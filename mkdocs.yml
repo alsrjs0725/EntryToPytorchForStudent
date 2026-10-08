@@ -1,0 +1,61 @@
+site_name: PyTorch 입문 튜토리얼
+site_description: 파이썬은 익숙하지만 머신러닝은 처음인 학생을 위한 PyTorch 튜토리얼
+site_url: https://alsrjs0725.github.io/EntryToPytorchForStudent/
+repo_url: https://github.com/alsrjs0725/EntryToPytorchForStudent
+repo_name: EntryToPytorchForStudent
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: ko
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      toggle:
+        icon: material/weather-night
+        name: 다크 모드
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: 라이트 모드
+
+plugins:
+  - search:
+      lang: [ko, en]
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js
+
+# nav를 지정하지 않아 docs/ 폴더 구조가 그대로 목차가 됩니다(번호 순 정렬).
