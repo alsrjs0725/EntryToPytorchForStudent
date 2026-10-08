@@ -1,7 +1,7 @@
 # GitHub Actions self-hosted 러너 + Manim 렌더링 환경
 FROM ubuntu:24.04
 
-ARG RUNNER_VERSION=2.331.0
+ARG RUNNER_VERSION=2.338.0
 ARG TARGETARCH=amd64
 
 ENV DEBIAN_FRONTEND=noninteractive
