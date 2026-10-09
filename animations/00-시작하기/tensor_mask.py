@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from manim import DOWN, LEFT, RIGHT, UP, Arrow, FadeIn, FadeOut, ReplacementTransform, Scene, Text, Transform, VGroup, Write
+from manim import DOWN, LEFT, RIGHT, UP, Arrow, Rectangle, FadeIn, FadeOut, ReplacementTransform, Scene, Text, Transform, VGroup, Write
 
 from common.style import COLOR_INPUT, COLOR_MUTED, COLOR_OUTPUT, FONT, ko
 from common.tensor import cell, code, grid, highlight
@@ -17,12 +17,11 @@ SIZE = 0.8
 
 def mask_cell(flag: bool) -> VGroup:
     color = COLOR_OUTPUT if flag else COLOR_MUTED
-    c = cell("", color, SIZE)
-    c[0].set_fill(color, opacity=0.6 if flag else 0.15)
-    label = Text(str(flag), font=FONT, font_size=18, color=color if not flag else "#000000").move_to(c[0])
-    c.remove(c[1])
-    c.add(label)
-    return c
+    # 글자가 작아지지 않도록 마스크 칸은 가로로 길게 그립니다.
+    box = Rectangle(width=1.1, height=SIZE, stroke_color=color, stroke_width=2)
+    box.set_fill(color, opacity=0.6 if flag else 0.15)
+    label = Text(str(flag), font=FONT, font_size=24, color=color if not flag else "#000000").move_to(box)
+    return VGroup(box, label)
 
 
 class TensorMask(Scene):
@@ -62,7 +61,7 @@ class TensorMask(Scene):
         picked = [(i, j) for i in range(3) for j in range(4) if M[i][j] > 6]
         self.play(
             *[highlight(m[i][j], COLOR_OUTPUT) for i, j in picked],
-            *[mask[i][j].animate.set_opacity(0.3) for i in range(3) for j in range(4) if (i, j) not in picked],
+            *[mask[i][j].animate.set_opacity(0.5) for i in range(3) for j in range(4) if (i, j) not in picked],
             run_time=1,
         )
         result = VGroup(*[cell(M[i][j], COLOR_OUTPUT, SIZE) for i, j in picked]).arrange(RIGHT, buff=0)
