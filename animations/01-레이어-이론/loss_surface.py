@@ -139,16 +139,7 @@ class LossSurface(ThreeDScene):
         self.wait(3)
         self.stop_ambient_camera_rotation()
 
-        # 5. 가장 낮은 곳: 손실이 가장 작은 (w, b)
-        w_best, b_best = np.linalg.lstsq(np.vstack([X, np.ones_like(X)]).T, Y, rcond=None)[0]
-        bottom = Dot3D(p(w_best, b_best, mse(w_best, b_best)), radius=0.12, color="#1F4E99")  # 옅은 바닥색 위에서도 보이는 짙은 파랑
-        self.play(
-            *say(f"가장 낮은 곳이 손실이 가장 작은 w = {w_best:.2f}, b = {b_best:.2f}예요", color=COLOR_OUTPUT),
-            FadeIn(bottom), run_time=1,
-        )
-        self.wait(1.2)
-
-        # 6. 위에서 내려다보면 문서의 손실 지도와 같아요.
+        # 5. 위에서 내려다보면 문서의 손실 지도와 같아요.
         flat = VGroup(
             *[lying(str(n), 24, COLOR_MUTED, p(n, B_RANGE[0] - 0.35, 0)) for n in range(-1, 6)],
             lying("w", 30, COLOR_WEIGHT, p(5.5, B_RANGE[0] - 0.35, 0)),
@@ -160,5 +151,14 @@ class LossSurface(ThreeDScene):
             phi=0, theta=-90 * DEGREES, zoom=0.85,
             added_anims=[FadeOut(w_labels), FadeOut(b_labels), FadeOut(loss_labels), FadeOut(axes.z_axis), FadeIn(flat)],
             run_time=3,
+        )
+        self.wait(1.5)
+
+        # 6. 가장 낮은 곳: 손실이 가장 작은 (w, b). 비스듬한 시점에서는 곡면에 가려서, 위에서 본 뒤에 찍어요.
+        w_best, b_best = np.linalg.lstsq(np.vstack([X, np.ones_like(X)]).T, Y, rcond=None)[0]
+        bottom = Dot3D(p(w_best, b_best, mse(w_best, b_best)), radius=0.12, color="#1F4E99")  # 옅은 바닥색 위에서도 보이는 짙은 파랑
+        self.play(
+            *say(f"가장 낮은 곳이 손실이 가장 작은 w = {w_best:.2f}, b = {b_best:.2f}예요", color=COLOR_OUTPUT),
+            FadeIn(bottom), run_time=1,
         )
         self.wait(2.5)
