@@ -7,6 +7,7 @@
 ```
 animations/
 ├── common/style.py           # 공통 색, 한글 글꼴, ko() 도우미
+├── common/tensor.py          # 텐서 격자, 코드 글꼴, fmt() 도우미
 ├── 01-레이어-이론/            # 커리큘럼 카테고리와 같은 이름
 │   └── linear_layer.py       # 장면 파일 (예시)
 ├── render.py                 # 렌더링 후 docs/videos/로 복사

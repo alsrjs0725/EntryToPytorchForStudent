@@ -8,14 +8,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from manim import DOWN, LEFT, RIGHT, UP, FadeIn, FadeOut, LaggedStart, Scene, VGroup, Write
 
 from common.style import COLOR_BIAS, COLOR_INPUT, COLOR_OUTPUT, ko
-from common.tensor import code, grid
+from common.tensor import code, fmt, grid
 
 BIAS = [1.0, 2.0, 3.0]
-
-
-def fmt(v: float) -> str:
-    # PyTorch 출력처럼 1.0을 "1."로 적습니다.
-    return f"{v:.0f}."
 
 
 class TensorBroadcast(Scene):

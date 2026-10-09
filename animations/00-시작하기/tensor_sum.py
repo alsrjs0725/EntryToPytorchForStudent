@@ -21,9 +21,9 @@ from manim import (
 )
 
 from common.style import COLOR_INPUT, COLOR_MUTED, COLOR_OUTPUT, ko
-from common.tensor import cell, code, grid, highlight
+from common.tensor import cell, code, fmt, grid, highlight
 
-X = [[1, 2], [3, 4]]
+X = [[1.0, 2.0], [3.0, 4.0]]
 
 
 class TensorSum(Scene):
@@ -31,7 +31,7 @@ class TensorSum(Scene):
         title = ko("sum(dim=0)은 0번 축을 따라 더하고, 그 축은 사라져요", size=30).to_edge(UP)
         self.play(Write(title))
 
-        x = grid(X, size=0.9).shift(LEFT * 2.5)
+        x = grid([[fmt(v) for v in row] for row in X], size=0.9).shift(LEFT * 2.5)
         dim0 = Arrow(x.get_corner(UP + LEFT), x.get_corner(DOWN + LEFT), buff=0, color=COLOR_MUTED).shift(LEFT * 0.4)
         dim1 = Arrow(x.get_corner(UP + LEFT), x.get_corner(UP + RIGHT), buff=0, color=COLOR_MUTED).shift(UP * 0.4)
         dim0_label = code("dim 0", size=22, color=COLOR_MUTED).next_to(dim0, LEFT, buff=0.15)
@@ -55,7 +55,7 @@ class TensorSum(Scene):
             self.play(axis.animate.set_color(COLOR_OUTPUT))
 
             result = VGroup(
-                *[cell(sum(X[i][j] for i, j in g), COLOR_OUTPUT, size=0.9) for g in groups]
+                *[cell(fmt(sum(X[i][j] for i, j in g)), COLOR_OUTPUT, size=0.9) for g in groups]
             ).arrange(RIGHT, buff=0).shift(RIGHT * 2.8)
             shape_text = code("(2,)", size=26, color=COLOR_OUTPUT).next_to(result, DOWN, buff=0.3)
             for g, target in zip(groups, result):

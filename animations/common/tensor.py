@@ -9,6 +9,11 @@ MONO_FONT = "Noto Sans Mono CJK KR"
 CELL_SIZE = 0.7
 
 
+def fmt(v: float) -> str:
+    """PyTorch 출력처럼 실수 1.0을 "1."로 적습니다."""
+    return f"{v:.0f}."
+
+
 def code(text: str, size: int = 28, color=COLOR_TEXT, **kwargs) -> Text:
     """코드 한 줄을 고정폭 글꼴로 만듭니다."""
     label = Text(text, font=MONO_FONT, font_size=size, color=color, **kwargs)
