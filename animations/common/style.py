@@ -1,6 +1,6 @@
 """모든 장면이 함께 쓰는 색, 글꼴, 도우미 함수."""
 
-from manim import BLUE, GREY_B, ORANGE, RED, TEAL, WHITE, YELLOW, Text
+from manim import BLUE, GREEN, GREY_B, ORANGE, RED, TEAL, WHITE, YELLOW, Text
 
 # 한글 글꼴. Colab과 우분투에서는 fonts-noto-cjk 패키지로 설치됩니다.
 FONT = "Noto Sans CJK KR"
@@ -11,6 +11,7 @@ COLOR_WEIGHT = ORANGE  # 가중치 W
 COLOR_BIAS = TEAL  # 편향 b
 COLOR_OUTPUT = YELLOW  # 출력 y
 COLOR_LOSS = RED  # 손실
+COLOR_GRAD = GREEN  # 손실이 줄어드는 방향 (기울기 화살표)
 COLOR_TEXT = WHITE
 COLOR_MUTED = GREY_B
 
