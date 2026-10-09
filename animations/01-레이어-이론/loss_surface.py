@@ -1,4 +1,4 @@
-"""loss vs w 곡선을 b마다 그려 쌓고, 그 사이를 메워 loss over (w, b) 곡면을 만듭니다."""
+"""loss vs w 곡선을 b마다 그려 쌓고, 그 사이를 메워 w, b 값에 따른 손실 곡면을 만듭니다."""
 
 import sys
 from pathlib import Path
@@ -127,17 +127,21 @@ class LossSurface(ThreeDScene):
         surface = Surface(
             lambda u, v: p(u, v, mse(u, v)),
             u_range=W_RANGE, v_range=B_RANGE, resolution=(30, 30),
-            fill_opacity=0.75, stroke_width=0.3, stroke_color=COLOR_MUTED, checkerboard_colors=False,
+            fill_opacity=0.95, stroke_width=0.3, stroke_color=COLOR_MUTED, checkerboard_colors=False,
         )
-        surface.set_fill_by_value(axes=axes, colorscale=[("#FDE2D8", 0), ("#F08A6B", 4), ("#C0392B", 12)], axis=2)
-        self.play(*say("곡선 사이를 메우면 손실 곡면 loss over (w, b)가 돼요"), FadeIn(surface), curves.animate.set_stroke(opacity=0.6, width=2), run_time=2)
+        # 손실이 작은 바닥 근처도 구분되도록 낮은 값에 색 단계를 촘촘히 둡니다.
+        surface.set_fill_by_value(
+            axes=axes, axis=2,
+            colorscale=[("#FFF7C2", 0), ("#FDD15C", 1), ("#F7942F", 3), ("#D9432A", 6), ("#6E0F1F", 12)],
+        )
+        self.play(*say("곡선 사이를 메우면 w, b 값에 따른 손실 곡면이 돼요"), FadeIn(surface), curves.animate.set_stroke(color=COLOR_TEXT, opacity=0.35, width=1.5), run_time=2)
         self.begin_ambient_camera_rotation(rate=0.12)
         self.wait(3)
         self.stop_ambient_camera_rotation()
 
         # 5. 가장 낮은 곳: 손실이 가장 작은 (w, b)
         w_best, b_best = np.linalg.lstsq(np.vstack([X, np.ones_like(X)]).T, Y, rcond=None)[0]
-        bottom = Dot3D(p(w_best, b_best, mse(w_best, b_best)), radius=0.1, color=COLOR_OUTPUT)
+        bottom = Dot3D(p(w_best, b_best, mse(w_best, b_best)), radius=0.12, color="#1F4E99")  # 옅은 바닥색 위에서도 보이는 짙은 파랑
         self.play(
             *say(f"가장 낮은 곳이 손실이 가장 작은 w = {w_best:.2f}, b = {b_best:.2f}예요", color=COLOR_OUTPUT),
             FadeIn(bottom), run_time=1,
