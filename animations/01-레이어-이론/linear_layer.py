@@ -6,6 +6,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from manim import (
+    BLACK,
+    Arrow,
+    GrowArrow,
+    Rectangle,
+    SurroundingRectangle,
     DOWN,
     LEFT,
     RIGHT,
@@ -27,7 +32,7 @@ from manim import (
     always_redraw,
 )
 
-from common.style import COLOR_BIAS, COLOR_INPUT, COLOR_MUTED, COLOR_OUTPUT, COLOR_WEIGHT, ko
+from common.style import COLOR_BIAS, COLOR_INPUT, COLOR_MUTED, COLOR_OUTPUT, COLOR_TEXT, COLOR_WEIGHT, ko
 
 # 2차원 선형 레이어의 가중치와 편향. 노트북의 W, b와 같은 값입니다.
 W = [[1.0, 0.8], [-0.4, 1.2]]
@@ -108,63 +113,159 @@ class LinearLayer(Scene):
         self.play(*[FadeOut(m) for m in self.mobjects])
 
     def two_dim(self):
-        """숫자 2개 (x0, x1)를 받아 숫자 2개 (y0, y1)를 내는 y = Wx + b."""
-        background = NumberPlane(
-            x_range=[-6, 6], y_range=[-4, 4], background_line_style={"stroke_opacity": 0.15}, axis_config={"stroke_opacity": 0.6}
-        )
-        plane = NumberPlane(x_range=[-6, 6], y_range=[-4, 4], background_line_style={"stroke_opacity": 0.5})
-        axis0 = ko("x0", size=26, color=COLOR_INPUT).move_to(background.c2p(5.6, -0.4))
-        axis1 = ko("x1", size=26, color=COLOR_INPUT).move_to(background.c2p(0.45, 3.6))
+        """숫자 2개 (x0, x1)를 받아 숫자 2개 (y0, y1)를 내는 y = Wx + b. 슬라이더로 W, b를 하나씩 바꿔 봅니다."""
+        w00, w01, w10, w11 = (ValueTracker(v) for v in (1.0, 0.0, 0.0, 1.0))
+        b0, b1 = ValueTracker(0.0), ValueTracker(0.0)
 
-        points = VGroup(
-            *[Dot(plane.c2p(x, y), radius=0.06, color=COLOR_INPUT) for x in range(-2, 3) for y in range(-2, 3)]
-        )
-        marked = Dot(plane.c2p(1, 1), radius=0.1, color=COLOR_INPUT)
-        marked_label = ko("(x0, x1) = (1, 1)", size=22, color=COLOR_INPUT).next_to(marked, RIGHT, buff=0.15)
+        def f(p0, p1):
+            """입력 점 (x0, x1)을 출력 점 (y0, y1)로 옮깁니다."""
+            return (
+                w00.get_value() * p0 + w01.get_value() * p1 + b0.get_value(),
+                w10.get_value() * p0 + w11.get_value() * p1 + b1.get_value(),
+            )
 
-        title = ko("입력이 숫자 2개인 점 x = (x0, x1)", size=30).to_corner(UL)
-        self.play(FadeIn(background), Create(plane), FadeIn(points), FadeIn(marked), Write(title))
-        self.play(FadeIn(axis0), FadeIn(axis1), FadeIn(marked_label))
+        # 왼쪽: 평면. 흐린 격자는 입력 공간, 노란 격자는 레이어를 지난 출력 공간이에요.
+        plane = NumberPlane(
+            x_range=[-3, 3],
+            y_range=[-3, 3],
+            x_length=6.8,
+            y_length=6.8,
+            background_line_style={"stroke_opacity": 0.25},
+            axis_config={"stroke_opacity": 0.7},
+        ).to_edge(LEFT, buff=0.3).shift(DOWN * 0.35)
+        axis0 = ko("x0 · y0", size=20).move_to(plane.c2p(2.5, -0.3))
+        axis1 = ko("x1 · y1", size=20).move_to(plane.c2p(-0.6, 2.75))
+
+        def warped_grid():
+            lines = VGroup()
+            for v in range(-2, 3):
+                for a, b in (((-2, v), (2, v)), ((v, -2), (v, 2))):
+                    lines.add(Line(plane.c2p(*f(*a)), plane.c2p(*f(*b)), color=COLOR_OUTPUT, stroke_width=2, stroke_opacity=0.55))
+            return lines
+
+        grid_out = always_redraw(warped_grid)
+        x_arrow = Arrow(plane.c2p(0, 0), plane.c2p(1, 1), buff=0, color=COLOR_INPUT, stroke_width=7, tip_length=0.25, max_tip_length_to_length_ratio=0.3)
+        x_arrow.set_z_index(1.2)
+        x_label = ko("x = (1, 1)", size=22, color=COLOR_INPUT).next_to(x_arrow, LEFT, buff=0.1)
+        y_arrow = always_redraw(
+            lambda: Arrow(
+                plane.c2p(0, 0), plane.c2p(*f(1, 1)), buff=0, color=COLOR_OUTPUT,
+                stroke_width=7, tip_length=0.25, max_tip_length_to_length_ratio=0.3,
+            ).set_z_index(1.2)
+        )
+        y_label = always_redraw(
+            lambda: ko(f"y = ({fmt(f(1, 1)[0])}, {fmt(f(1, 1)[1])})", size=22, color=COLOR_OUTPUT).next_to(
+                plane.c2p(*f(1, 1)), UP, buff=0.1
+            )
+        )
+
+        # 오른쪽: 식, W와 b의 값, 슬라이더. 격자가 넘어와도 가리도록 불투명한 판을 깝니다.
+        panel = Rectangle(width=6.2, height=8.2, fill_color=BLACK, fill_opacity=1, stroke_width=0)
+        panel.to_edge(RIGHT, buff=0).set_z_index(0.5)
+        cx = panel.get_center()[0]
+        eq = VGroup(
+            ko("y = ", size=40, color=COLOR_OUTPUT),
+            ko("W", size=40, color=COLOR_WEIGHT),
+            ko("x", size=40, color=COLOR_INPUT),
+            ko(" + ", size=40),
+            ko("b", size=40, color=COLOR_BIAS),
+        ).arrange(RIGHT, buff=0.05).move_to([cx, 3.3, 0])
+
+        def matrix_view():
+            def num(v, color):
+                return ko(fmt(v), size=26, color=color)
+
+            cells = VGroup(
+                num(w00.get_value(), COLOR_WEIGHT).move_to([cx - 1.9, 2.25, 0]),
+                num(w01.get_value(), COLOR_WEIGHT).move_to([cx - 0.9, 2.25, 0]),
+                num(w10.get_value(), COLOR_WEIGHT).move_to([cx - 1.9, 1.75, 0]),
+                num(w11.get_value(), COLOR_WEIGHT).move_to([cx - 0.9, 1.75, 0]),
+                num(b0.get_value(), COLOR_BIAS).move_to([cx + 1.9, 2.25, 0]),
+                num(b1.get_value(), COLOR_BIAS).move_to([cx + 1.9, 1.75, 0]),
+            )
+            return cells.set_z_index(2)
+
+        def brackets(left, right):
+            group = VGroup()
+            for x, sign in ((left, 1), (right, -1)):
+                group.add(
+                    Line([x, 2.5, 0], [x, 1.5, 0], stroke_width=2),
+                    Line([x, 2.5, 0], [x + 0.12 * sign, 2.5, 0], stroke_width=2),
+                    Line([x, 1.5, 0], [x + 0.12 * sign, 1.5, 0], stroke_width=2),
+                )
+            return group
+
+        matrix_frame = VGroup(
+            ko("W =", size=26, color=COLOR_WEIGHT).move_to([cx - 2.85, 2.0, 0]),
+            brackets(cx - 2.4, cx - 0.4),
+            ko("b =", size=26, color=COLOR_BIAS).move_to([cx + 0.95, 2.0, 0]),
+            brackets(cx + 1.45, cx + 2.35),
+        ).set_z_index(2)
+        matrix = always_redraw(matrix_view)
+
+        slider_specs = [("W00", w00, COLOR_WEIGHT), ("W01", w01, COLOR_WEIGHT), ("W10", w10, COLOR_WEIGHT),
+                        ("W11", w11, COLOR_WEIGHT), ("b0", b0, COLOR_BIAS), ("b1", b1, COLOR_BIAS)]
+        sliders = VGroup()
+        knobs = VGroup()
+        for i, (name, tracker, color) in enumerate(slider_specs):
+            y = 0.8 - i * 0.62
+            track = NumberLine(x_range=[-2, 2, 1], length=3.2, stroke_width=2, tick_size=0.05).move_to([cx + 0.3, y, 0])
+            label = ko(name, size=24, color=color).next_to(track, LEFT, buff=0.35)
+            sliders.add(VGroup(track, label))
+            knobs.add(always_redraw(lambda t=track, tr=tracker, c=color: Dot(t.n2p(tr.get_value()), radius=0.11, color=c).set_z_index(3)))
+        sliders.set_z_index(2)
+        scale = VGroup(
+            Text("-2", font_size=18).next_to(sliders[-1][0].n2p(-2), DOWN, buff=0.15),
+            Text("0", font_size=18).next_to(sliders[-1][0].n2p(0), DOWN, buff=0.15),
+            Text("2", font_size=18).next_to(sliders[-1][0].n2p(2), DOWN, buff=0.15),
+        ).set_z_index(2)
+
+        caption = ko("W00 = W11 = 1, 나머지가 0이면 그대로예요", size=24).move_to([cx, -3.65, 0]).set_z_index(2)
+
+        title = ko("입력이 숫자 2개: x = (x0, x1)", size=28).to_corner(UL, buff=0.25)
+        self.play(FadeIn(plane), FadeIn(axis0), FadeIn(axis1), Write(title))
+        self.play(GrowArrow(x_arrow), FadeIn(x_label))
+        self.play(FadeIn(panel), Write(eq))
+        self.play(FadeIn(matrix_frame), FadeIn(matrix), FadeIn(sliders), FadeIn(scale), FadeIn(knobs))
+        self.play(FadeIn(grid_out), FadeIn(y_arrow), FadeIn(y_label), FadeIn(caption))
         self.wait(0.8)
 
-        step_w = ko("1. W를 곱하면 늘어나고 기울어져요", size=26, color=COLOR_WEIGHT)
-        step_w.next_to(title, DOWN, aligned_edge=LEFT)
-        self.play(FadeIn(step_w), FadeOut(marked_label))
-        moving = VGroup(plane, points, marked)
-        self.play(moving.animate.apply_matrix(W), run_time=2)
-        self.wait(0.4)
+        focus = SurroundingRectangle(sliders[0], color=COLOR_TEXT, buff=0.12, stroke_width=2).set_z_index(2)
+        self.play(FadeIn(focus), run_time=0.3)
 
-        step_b = ko("2. b를 더하면 통째로 옮겨져요", size=26, color=COLOR_BIAS)
-        step_b.next_to(step_w, DOWN, aligned_edge=LEFT)
-        shift = plane.c2p(*B) - plane.c2p(0, 0)
-        self.play(FadeIn(step_b))
-        self.play(moving.animate.shift(shift), run_time=1.5)
+        def step(text, index, changes, back=None, color=COLOR_WEIGHT):
+            """슬라이더 하나(또는 여러 개)를 움직였다가 되돌립니다."""
+            new_caption = ko(text, size=24, color=color).move_to(caption).set_z_index(2)
+            target = SurroundingRectangle(
+                VGroup(*[sliders[i] for i in index]), color=COLOR_TEXT, buff=0.12, stroke_width=2
+            ).set_z_index(2)
+            self.play(Transform(caption, new_caption), Transform(focus, target), run_time=0.5)
+            self.play(*[tr.animate.set_value(v) for tr, v in changes], run_time=1.4)
+            self.wait(0.5)
+            if back:
+                self.play(*[tr.animate.set_value(v) for tr, v in back], run_time=0.8)
 
-        # 출력 좌표는 같은 축에서 y0, y1로 읽어요. (1, 1)은 (2.8, 1.3)으로 옮겨집니다.
-        y0 = W[0][0] * 1 + W[0][1] * 1 + B[0]
-        y1 = W[1][0] * 1 + W[1][1] * 1 + B[1]
-        out0 = ko("y0", size=26, color=COLOR_OUTPUT).move_to(axis0)
-        out1 = ko("y1", size=26, color=COLOR_OUTPUT).move_to(axis1)
-        out_label = ko(f"(y0, y1) = ({fmt(y0)}, {fmt(y1)})", size=22, color=COLOR_OUTPUT)
-        out_label.next_to(marked, RIGHT, buff=0.15)
-        self.play(
-            points.animate.set_color(COLOR_OUTPUT),
-            marked.animate.set_color(COLOR_OUTPUT),
-            Transform(axis0, out0),
-            Transform(axis1, out1),
-            FadeIn(out_label),
+        step("W00을 키우면 x0 방향으로 늘어나요", [0], [(w00, 2.0)], back=[(w00, 1.0)])
+        step("W11을 줄이면 x1 방향으로 줄어들어요", [3], [(w11, 0.5)], back=[(w11, 1.0)])
+        step("W01을 바꾸면 옆으로 기울어져요", [1], [(w01, 1.0)], back=[(w01, 0.0)])
+        step("W10을 바꾸면 위아래로 기울어져요", [2], [(w10, 1.0)], back=[(w10, 0.0)])
+        step("W00이 음수면 좌우가 뒤집혀요", [0], [(w00, -1.0)], back=[(w00, 1.0)])
+        step(
+            "네 값을 함께 바꾸면 회전도 돼요",
+            [0, 1, 2, 3],
+            [(w00, 0.7), (w01, -0.7), (w10, 0.7), (w11, 0.7)],
+            back=[(w00, 1.0), (w01, 0.0), (w10, 0.0), (w11, 1.0)],
         )
-        self.wait(0.8)
+        step("b0을 바꾸면 x0 방향으로 통째로 옮겨져요", [4], [(b0, 1.5)], back=None, color=COLOR_BIAS)
+        step("b1을 바꾸면 x1 방향으로 통째로 옮겨져요", [5], [(b1, 1.0)], back=[(b0, 0.0), (b1, 0.0)], color=COLOR_BIAS)
 
-        # 숫자 하나짜리 식 w·x + b가 출력마다 하나씩 생겨요.
-        rows = VGroup(
-            ko(f"y0 = {fmt(W[0][0])}·x0 + {fmt(W[0][1])}·x1 + {fmt(B[0])}", size=26),
-            ko(f"y1 = {fmt(W[1][0])}·x0 + {fmt(W[1][1])}·x1 + {fmt(B[1])}", size=26),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.15)
-        rows.to_edge(DOWN).shift(LEFT * 3)
-        self.play(FadeIn(rows))
+        # 마지막으로 노트북의 W, b를 넣어요. x = (1, 1)은 y = (2.8, 1.3)이 됩니다.
+        step(
+            "노트북의 W, b를 넣으면 이렇게 바뀌어요",
+            [0, 1, 2, 3, 4, 5],
+            [(w00, W[0][0]), (w01, W[0][1]), (w10, W[1][0]), (w11, W[1][1]), (b0, B[0]), (b1, B[1])],
+            back=None,
+            color=COLOR_OUTPUT,
+        )
+        self.play(FadeOut(focus))
         self.wait(1.5)
-
-        summary = ko("y = Wx + b", size=40, color=COLOR_OUTPUT).move_to(rows)
-        self.play(Transform(rows, summary))
-        self.wait(1.2)
