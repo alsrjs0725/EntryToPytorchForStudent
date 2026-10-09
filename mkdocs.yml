@@ -31,6 +31,9 @@ theme:
         icon: material/weather-sunny
         name: 라이트 모드
 
+hooks:
+  - hooks/colab_links.py
+
 plugins:
   - search:
       lang: [ko, en]
